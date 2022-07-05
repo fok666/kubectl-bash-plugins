@@ -1,17 +1,17 @@
 #!/bin/bash
 
-C=$(kubectl get configMap -n livecloud -o json \
+C=$(kubectl get configMap -n $1 -o json \
   | jq '.items[] | .metadata.name as $name | .data | with_entries(.key |= "          - name: " + . + "\n            valueFrom:\n              configMapKeyRef:\n                name: " + ($name) + "\n                key: " + .)' \
-  | grep ":" | grep -i $1 | sed -r 's/\s+"(.*)": "(.*)",?$/\1/g')
+  | grep ":" | grep -i $2 | sed -r 's/\s+"(.*)": "(.*)",?$/\1/g')
 
 OIFS=$IFS
 IFS=
 [[ -n $C ]] && echo -e $C
 IFS=$OIFS
 
-S=$(kubectl get secret -n livecloud -o json \
+S=$(kubectl get secret -n $1 -o json \
   | jq '.items[] | .metadata.name as $name | .data | with_entries(.key |= "          - name: " + . + "\n            valueFrom:\n              secretKeyRef:\n                name: " + ($name) + "\n                key: " + .)' \
-  | grep ":" | grep -i $1 | sed -r 's/\s+"(.*)": "(.*)",?$/\1/g')
+  | grep ":" | grep -i $2 | sed -r 's/\s+"(.*)": "(.*)",?$/\1/g')
 
 OIFS=$IFS
 IFS=
