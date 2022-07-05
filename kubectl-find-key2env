@@ -1,14 +1,14 @@
 #!/bin/bash
 
-C=$(kubectl get configMap -n livecloud -o json \
+C=$(kubectl get configMap -n $1 -o json \
   | jq '.items[] | .metadata.name as $name | .data' \
-  | grep ":" | grep -i $1 | sed -r 's/\s+"(.*)": "(.*)",?$/ENV \1="\2"/g')
+  | grep ":" | grep -i $2 | sed -r 's/\s+"(.*)": "(.*)",?$/ENV \1="\2"/g')
 
 [[ -n $C ]] && echo -e $C
 
-S=$(kubectl get secret -n livecloud -o json \
+S=$(kubectl get secret -n $1 -o json \
   | jq '.items[] | .metadata.name as $name | .data' \
-  | grep ":" | grep -i $1 | sed -r 's/\s+"(.*)": "(.*)",?$/ENV \1:\2/g' \
+  | grep ":" | grep -i $2 | sed -r 's/\s+"(.*)": "(.*)",?$/ENV \1:\2/g' \
   | awk -F: -v q="'" '{a="\""; cmd="echo -n " q $2 q " | base64 -d | tr -d [:cntrl:]";cmd| getline x;close(cmd); print $1 "=" q x q}')
 
 [[ -n $S ]] && echo -e $S
